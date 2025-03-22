@@ -19,6 +19,11 @@ dir$output <- paste(dir$root, "/output", sep= "")
 dir$code <- paste(dir$root, "/code", sep= "")
 
 
+#source(paste0(dir$code, "/0_function_simulation.R"))
+source(paste0(dir$code, "/0_algorithm.R"))
+source(paste0(dir$code, "/1_function_plot.R"))
+#source(paste0(dir$code, "/2_function_optim_w.R"))
+
 ##---------------------   Initialization   ----------------------##
 ##---------------------   Data Generating Process   ----------------------##
 set.seed(45) #45
@@ -83,11 +88,6 @@ for (t in 1:s_max) {
 #print(Y)
 
 
-#source(paste0(dir$code, "/0_function_simulation.R"))
-source(paste0(dir$code, "/0_algorithm.R"))
-source(paste0(dir$code, "/1_function_plot.R"))
-#source(paste0(dir$code, "/2_function_optim_w.R"))
-
 #------------------------------------------------------------------------------#
 ###.                             Setup for alg                               ###
 #------------------------------------------------------------------------------#
@@ -98,10 +98,10 @@ B <- list()
 c <- 1
 
 # Iterate over b_F, b_Z, and b_X ensuring they sum to 1
-for (b_F in seq(0.01, 0.99, by = 0.02)) {
-  for (b_Z in seq(0.01, 1 - b_F, by = 0.02)) {
+for (b_F in seq(0.01, 0.99, by = 0.01)) {
+  for (b_Z in seq(0.01, 1 - b_F, by = 0.01)) {
     b_X <- 1 - b_F - b_Z  # Directly calculate b_X to satisfy the constraint
-    if (b_X >= 0.02) {    # Ensure b_X meets the minimum step size
+    if (b_X >= 0.01) {    # Ensure b_X meets the minimum step size
       # Add the current values of b_F, b_Z, and b_X as a list to result_list
       B[[c]] <- list(b_F = b_F, b_Z = b_Z, b_X = b_X)
       c <- c + 1
@@ -124,6 +124,8 @@ X_treated <- X[1, ]
 X_control <- X[2:(J+1), ]
 mu_treated <- mu[1, ]
 mu_control <- mu[2:(J+1), ]
+Y_treated <- Y[1, ]
+Y_control <- Y[2:(J+1), ]
 
 
 result_X <- optimize_w_ipop(F_treated, F_control, X, Z, t_max, dr, dt, i_max, target = "X")
@@ -138,11 +140,14 @@ NSE_Z_baseline <- NSE_x(wZ, F, X, Z, t_max, dr, dt, i_max, target = "Z")
 print(NSE_Z_baseline)
 
 
+#
+eta_Z = 0.1  #0.02
+eta_X = 0.1  #0.02
 # One test for the algorithm 
 b_list <- find_best_B(B, F_treated, F_control, 
                       X_treated, X_control, Z_treated, Z_control, 
                       t_max, dr, dt, i_max, 
-                      NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline, eta_Z=0.02, eta_X=0.02) 
+                      NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline, eta_Z = eta_Z, eta_X = eta_X) 
 
 b_list
 
@@ -176,14 +181,7 @@ synthetic_target_plot(Y = Y, w = w, s_max = s_max, i_max = i_max)
 
 #----------------------    Placebo Test   ---------------------------#
 #--------------------------------------------------------------------#
-Placebo_test(F = F, Y = Y, J = J, t_max = t_max, s_max = s_max, w = w)
-
-
-
-
-
-
-
+Placebo_test(F = F, Y = Y, J = J, t_max = t_max, s_max = s_max, w = w, eta_Z = eta_Z, eta_X = eta_X)
 
 
 
@@ -193,6 +191,7 @@ Placebo_test(F = F, Y = Y, J = J, t_max = t_max, s_max = s_max, w = w)
 linear_equi_conf_plot(F = F, Y = Y)
 
 
+source(paste0(dir$code, "/1_function_plot.R"))
 ## plot for Logrithmic Equi-confounding(Figure 1b)
 logorithmic_equi_conf_plot(F= F, Y = Y)
 
@@ -221,6 +220,74 @@ bias = abs(mean(causal) - estimate)
 
 print(paste("The value of the ETT is",estimate))
 print(paste("The value of the bias is",bias))
+
+
+##------------  Sensitivity Analysis for synthetic --------------------##
+
+eta_values <- c(0.05, 0.1, 0.15, 0.2)
+eta_combinations <- expand.grid(eta_X = eta_values, eta_Z = eta_values)
+
+# Initialize a dataframe to store results
+results <- eta_combinations %>%
+  mutate(
+#    diff_median_income_black = NA,
+#    diff_proportion_black = NA,
+#    diff_median_age_black = NA,
+    
+    ett_synthetic = NA
+  )
+
+
+# Loop over all 16 combinations of eta_X and eta_Z
+for (i in seq_len(nrow(results))) {
+  eta_X <- results$eta_X[i]
+  eta_Z <- results$eta_Z[i]
+  
+  # Call the function with different eta_X and eta_Z values
+  b_list <- find_best_B(
+    B, F_treated, F_control, 
+    X_treated, X_control, Z_treated, Z_control, 
+    t_max, dr, dt, i_max, 
+    NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline, eta_Z = eta_Z, eta_X = eta_X) 
+
+  
+  # Solve for weight vector (w) using the optimal B values
+  w <- b_list$best_w_star
+  
+  # Sensitivity matrix
+  ett_synthetic <- mean(Y_treated + causal - t(w) %*% Y[2:(J + 1), ])
+  
+  # Store results
+  results$ett_synthetic[i] <- round(ett_synthetic,3)
+}
+
+
+# Reshape data for heatmap plotting
+results_long <- melt(results, id.vars = c("eta_X", "eta_Z"))
+
+# List of metrics to plot
+metrics <- c(
+             "ett_synthetic")
+
+for (metric in metrics) {
+  p <- ggplot(results_long %>% filter(variable == metric), aes(x = eta_X, y = eta_Z, fill = value)) +
+    geom_tile() +
+    geom_text(aes(label = round(value, 3)), size = 5, color = "black") +  
+    scale_fill_gradient2(low = "#D6EAF8", mid ="#ADD8E6", high = "skyblue",
+                         midpoint = median(results_long$value, na.rm = TRUE),
+                         name = "Causal effect") +
+    labs(title = paste(""),
+         x = expression(eta[X]),
+         y = expression(eta[Z])) +
+    theme_minimal()
+  
+  print(p)
+  ggsave(filename = paste0(dir$output, "/sensitivity_causal_effects_sim.pdf"), width = 6, height = 5) 
+}
+
+
+
+
 
 
 

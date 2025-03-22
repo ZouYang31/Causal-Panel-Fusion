@@ -15,6 +15,9 @@ simulation_B_list <- function(time, B, eta_Z, eta_X, alg = FALSE) {
 
   print(paste0("Function testing:", time))
   
+  # Initialized parameter:
+  # n, rhi, phi, theta
+  
   # Initialize the simulation vector to store MSE values
   simulation_bias_sc <- numeric(n)
   simulation_bias_linear <- numeric(n)
@@ -42,9 +45,9 @@ simulation_B_list <- function(time, B, eta_Z, eta_X, alg = FALSE) {
       }
     }
     
-    for (t in 1:s_max) {
+    for (s in 1:s_max) {
       for (i in 1:i_max) {
-        Y[i, t] <- varrho[t] + sum(varphi[t, ] * X[i, ]) + sum(vartheta[t, ] * mu[i, ]) + varepsilon[i, t]
+        Y[i, s] <- varrho[s] + sum(varphi[s, ] * X[i, ]) + sum(vartheta[s, ] * mu[i, ]) + varepsilon[i, s]
       }
     }
     

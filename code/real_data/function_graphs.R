@@ -45,11 +45,16 @@ synthetic_reference_plot_real_data <- function(F, w, t_max, i_max){
   
   # Custom legend breaks and labels
   legend_breaks <- c("Unit_1", "Synthetic_control", "Unit_2")  # Correct the value to match the data
-  legend_labels <- c("Chelsea", "synthetic Chelsea", "19 Cities")
+  legend_labels <- c("Chelsea", "Synthetic Chelsea", "19 Cities")
   
   # Plot the results - reference domain
-  ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
-    geom_line(size = 0.8) +
+  p <- ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(data_all, Unit != "Unit_1" & Unit != "Synthetic_control"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.5) +  # Plot grey donor pool lines first
+    geom_line(data = subset(data_all, Unit == "Synthetic_control"), 
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Dashed black line on top
+    geom_line(data = subset(data_all, Unit == "Unit_1"), 
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Solid black line on top
     scale_color_manual(values = color_map, 
                        breaks = legend_breaks,
                        labels = legend_labels) +
@@ -62,27 +67,31 @@ synthetic_reference_plot_real_data <- function(F, w, t_max, i_max){
          color = "Legend",
          linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.15), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
-          legend.text = element_text(size = 12), 
+          legend.text = element_text(size = 14), 
           legend.key.size = unit(1, "lines"),
           legend.key.width = unit(2, "lines"), 
           legend.margin = margin(0, 0, 0, 0),
           legend.background = element_rect(fill = scales::alpha('grey', 0.5)),
-          axis.title.x = element_text(size = 13),
-          axis.title.y = element_text(size = 13),
+          axis.title.x = element_text(size = 15),
+          axis.title.y = element_text(size = 15),
           axis.text.x = element_text(size = 14),
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
     guides(color = guide_legend(title = NULL, override.aes = list(
-      linetype = c("solid", "dashed", "dotted"),
+      linetype = c("solid", "dashed", "solid"),
       color = c("black", "black", "grey")),
       order = 1),
       linetype = guide_legend(title = NULL, override.aes = list(
         color = c("black", "black", "grey")),
         order = 1))
+  
+  print(p)
+  ggsave(filename = paste0(dir$output, "/covid_ref.pdf"), width = 8, height = 6, dpi = 300)
 }
+
 synthetic_target_plot_real_data <- function(Y, w, s_max, i_max){
   
   synthetic_treated_Y <- t(w) %*% Y[2:(J+1), ]
@@ -123,11 +132,16 @@ synthetic_target_plot_real_data <- function(Y, w, s_max, i_max){
   
   # Custom legend breaks and labels
   legend_breaks <- c("Unit_1", "Synthetic_control","Unit_2")  # Add "Unit_2" to represent control units
-  legend_labels <- c("Chelsea", "synthetic Chelsea", "19 Cities")
+  legend_labels <- c("Chelsea", "Synthetic Chelsea", "19 Cities")
   
   # Plot the results - reference domain
-  ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
-    geom_line(size = 0.8) +
+  p <- ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(data_all, Unit != "Unit_1" & Unit != "Synthetic_control"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.5) +  # Plot grey donor pool lines first
+    geom_line(data = subset(data_all, Unit == "Synthetic_control"), 
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Dashed black line on top
+    geom_line(data = subset(data_all, Unit == "Unit_1"), 
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Solid black line on top
     scale_color_manual(values = color_map, 
                        breaks = legend_breaks,
                        labels = legend_labels) +
@@ -140,16 +154,16 @@ synthetic_target_plot_real_data <- function(Y, w, s_max, i_max){
          color = "Legend",
          linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.2), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
-          legend.text = element_text(size = 12), 
+          legend.text = element_text(size = 14), 
           legend.key.size = unit(1, "lines"),
           legend.key.width = unit(2, "lines"), 
           legend.margin = margin(0, 0, 0, 0),
           legend.background = element_rect(fill = scales::alpha('grey', 0.5)),
-          axis.title.x = element_text(size = 13),
-          axis.title.y = element_text(size = 13),
+          axis.title.x = element_text(size = 15),
+          axis.title.y = element_text(size = 15),
           axis.text.x = element_text(size = 14),
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
@@ -160,6 +174,9 @@ synthetic_target_plot_real_data <- function(Y, w, s_max, i_max){
       linetype = guide_legend(title = NULL, override.aes = list(
         color = c( "black","black", "grey")),
         order = 1))
+  
+  print(p)
+  ggsave(filename = paste0(dir$output, "/covid_target.pdf"), width = 8, height = 6, dpi = 300)
   
 }
 
@@ -185,7 +202,7 @@ linear_equi_conf_plot_real_data <- function(Y_treated, Y_control, F_treated, F_c
   labels <- c('H_0' = "H[0]", 'B_0' = "B[0]", 'H_1' = "H[1]", 'B_1' = "B[1]")
   
   # Generate the plot
-  ggplot(data, aes(x = time, y = value)) +
+  p <- ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1) +
     geom_text(aes(label = labels[group]), vjust = -0.2, parse = TRUE) +  # Adding labels to points
     geom_line(aes(linetype = group), size = 0.8) +
@@ -219,4 +236,6 @@ linear_equi_conf_plot_real_data <- function(Y_treated, Y_control, F_treated, F_c
       axis.ticks.length = unit(0.25, "cm"),
       legend.title = element_blank()
     )
+  print(p)
 }
+

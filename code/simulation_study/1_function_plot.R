@@ -73,10 +73,10 @@ synthetic_reference_plot <- function(F, w, t_max, i_max){
          color = "Legend",
          linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.15), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
-          legend.text = element_text(size = 12), 
+          legend.text = element_text(size = 14), 
           legend.key.size = unit(1, "lines"),
           legend.key.width = unit(2, "lines"), 
           legend.margin = margin(0, 0, 0, 0),
@@ -93,6 +93,8 @@ synthetic_reference_plot <- function(F, w, t_max, i_max){
       linetype = guide_legend(title = NULL, override.aes = list(
         color = c("black", "black", "grey")),
         order = 1))
+  
+  ggsave(filename = paste0(dir$output, "/F_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 synthetic_target_plot <- function(Y, w, s_max, i_max){
@@ -160,7 +162,7 @@ synthetic_target_plot <- function(Y, w, s_max, i_max){
          color = "Legend",
          linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.2), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
           legend.text = element_text(size = 12), 
@@ -180,6 +182,8 @@ synthetic_target_plot <- function(Y, w, s_max, i_max){
       linetype = guide_legend(title = NULL, override.aes = list(
         color = c("red", "black","black", "grey")),
         order = 1))
+  
+  ggsave(filename = paste0(dir$output, "/Y_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 
@@ -225,7 +229,7 @@ linear_equi_conf_plot <- function(F, Y){
     ) +
     labs(title = NULL, x = NULL, y = NULL) +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"),
           legend.position = "none", 
           axis.title.x = element_text(size = 18),
           axis.title.y = element_text(size = 18),
@@ -233,6 +237,8 @@ linear_equi_conf_plot <- function(F, Y){
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
+  
+  ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 logorithmic_equi_conf_plot <- function(F, Y){
@@ -259,29 +265,36 @@ logorithmic_equi_conf_plot <- function(F, Y){
   # Plot with modified expression
   ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1.5) +
-    geom_text(aes(label = labels[group]), hjust = 0.5, vjust = 0, parse = TRUE, size = 5) +  # Adding labels to points
+    geom_text(aes(
+      label = labels[group], 
+      hjust = ifelse(time == 0, -0.1, 0),  # Left side labels move right, right side labels move left
+      vjust = ifelse(time == 0, 0, -0.2)  
+    ), parse = TRUE, size = 5) +  # Adding labels to points
     geom_line(aes(linetype = group), size = 0.8) +
     geom_line(data = data.frame(time = c(0, 1), value = c(log_F_1, log_Y_0_t), group = 'Y_0_t'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
     geom_line(data = data.frame(time = c(1, 0), value = c(log_Y_0, log_F_0), group = 'Y_0'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
-    scale_x_continuous(breaks = c(0, 1), labels = c('', '')) +
+    scale_x_continuous(limits = c(0, 1.25)) +
     scale_y_continuous(limits = c(1, 1.4)) +
     scale_linetype_manual(
       values = c('log_Y_0' = "solid", 'log_F_0' = "solid", 'log_Y_1' = "solid", 'log_F_1' = "solid", 'log_Y_0_t' = "solid"),
-      labels = c('log_Y_0' = expression(Y[0]), 'log_F_0' = expression(E * "[" * F[0] * "]"), 'log_Y_1' = expression(Y[1]), 'log_F_1' = expression(F[1]), 'log_Y_0_t' = expression(Y[1]^(0)))
+      labels = c('log_Y_0' = expression(Y[0]), 'log_F_0' = expression(E * "[" * F[0] * "]"), 
+                 'log_Y_1' = expression(Y[1]), 'log_F_1' = expression(F[1]), 'log_Y_0_t' = expression(Y[1]^(0)))
     ) +
     labs(title = NULL, x = NULL, y = NULL) +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = "none", 
-          axis.title.x = element_text(size = 18),
+          axis.title.x = element_blank(),
           axis.title.y = element_text(size = 18),
-          axis.text.x = element_text(size = 14),
+          axis.text.x = element_blank(),
           axis.text.y = element_text(size = 14),
-          axis.ticks.length = unit(0.25, "cm")) +
+          axis.ticks.length = unit(0.25, "cm"),
+          plot.margin = margin(30, 60, 10, 10)) +  # Added margin to prevent label cutoff
     theme(legend.title = element_blank())
   
+  ggsave(filename = paste0(dir$output, "/log_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 
@@ -317,9 +330,9 @@ NSE_plot_ZXF <- function(results_list){
     #scale_y_continuous(limits = c(0,6)) +
     labs(title = NULL,
          x = "Time",
-         y = "Values") +
+         y = "NSE") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.95), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
           legend.text = element_text(size = 16), 
@@ -334,6 +347,9 @@ NSE_plot_ZXF <- function(results_list){
           axis.ticks.length = unit(0.25, "cm")) +  # Adjust the aspect ratio
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
+  
+  ggsave(filename = paste0(dir$output, "/nse_mu_Z_X_F.pdf"), width = 8, height = 6, dpi = 300)
+  
 }
 
 NSE_plot_ZX <- function(results_list){
@@ -364,9 +380,9 @@ NSE_plot_ZX <- function(results_list){
     scale_y_continuous(limits = c(0, 0.08)) +
     labs(title = NULL,
          x = "Time",
-         y = "Values") +
+         y = "NSE") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.95),# Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
           legend.text = element_text(size = 16), 
@@ -382,6 +398,8 @@ NSE_plot_ZX <- function(results_list){
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
   
+  ggsave(filename = paste0(dir$output, "/nse_mu_Z_X.pdf"), width = 8, height = 6, dpi = 300)
+  
 }
 
 
@@ -389,7 +407,7 @@ NSE_plot_ZX <- function(results_list){
 # ------------------------------------------------------------------- #
 # ----------------------- Placebo Test Plot  ------------------------ #
 
-Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
+Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
   
   # Select all control units as placebo treated units
   placebo_units <- 2:i_max  
@@ -434,7 +452,7 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
                           X_treated = X_placebo_treated, X_control = X_placebo_control,
                           Z_treated = Z_placebo_treated, Z_control = Z_placebo_control,
                           t_max, dr, dt, i_max, 
-                          NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline, eta_Z=0.02, eta_X=0.02) 
+                          NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline, eta_Z= eta_Z, eta_X= eta_X) 
     # Solve for W
     w_placebo <- b_list$best_w_star
     print(w_placebo)
@@ -529,7 +547,7 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
     scale_y_continuous(limits = c(-10, 10)) +
     labs(title = NULL, x = "Time", y = "Causal Effect", color = "Legend", linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.1), 
           legend.justification = c(1, 1), 
           legend.text = element_text(size = 12), 
@@ -548,6 +566,8 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
            linetype = guide_legend(title = NULL, override.aes = list(color = c("black", "grey")), 
                                    order = 1))
   
+  ggsave(filename = paste0(dir$output, "/placebo_F.pdf"), width = 8, height = 6, dpi = 300)
+  
   legend_breaks <- c("Synthetic_Treated_Y", "Unit_2")  # Add "Unit_2" to represent control units
   legend_labels <- c("target unit", "control units")
   
@@ -565,7 +585,7 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
                           labels = legend_labels) +
     labs(title = NULL, x = "Time", y = "Causal Effect", color = "Legend", linetype = "Legend") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.1), 
           legend.justification = c(1, 1), 
           legend.text = element_text(size = 12), 
@@ -583,6 +603,8 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w){ #X, Z, dr, dt
                                 order = 1),
            linetype = guide_legend(title = NULL, override.aes = list(color = c("black", "grey")), 
                                    order = 1))
+
+  ggsave(filename = paste0(dir$output, "/placebo_Y.pdf"), width = 8, height = 6, dpi = 300)
   print(plot_F)
   print(plot_Y)
 }
@@ -617,28 +639,30 @@ linear_equi_conf_plot <- function(F, Y){
   # Plot with modified expression
   ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1.5) +
-    geom_text(aes(label = labels[group]), hjust = 0.5, vjust = 0, parse = TRUE, size = 5) +  # Adding labels to points
+    geom_text(aes(label = labels[group]), hjust = 0.2, vjust = -0.5, parse = TRUE, size = 7) +  # Adjusted vjust for better separation
     geom_line(aes(linetype = group), size = 0.8) +
     geom_line(data = data.frame(time = c(0, 1), value = c(F_1, Y_0_t), group = 'Y_0_t'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
     geom_line(data = data.frame(time = c(1, 0), value = c(Y_0, F_0), group = 'Y_0'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
-    scale_x_continuous(breaks = c(0, 1), labels = c('', '')) +
-    #scale_y_continuous(limits = c(1, 1.4)) +
+    scale_x_continuous(limits = c(0, 1.05)) +
+    scale_y_continuous(limits = c(1, 1.4)) +
     scale_linetype_manual(
       values = c('Y_0' = "solid", 'F_0' = "solid", 'Y_1' = "solid", 'F_1' = "solid", 'Y_0_t' = "solid"),
       labels = c('Y_0' = expression(Y[0]), 'F_0' = expression(E * "[" * F[0] * "]"), 'Y_1' = expression(Y[1]), 'F_1' = expression(F[1]), 'Y_0_t' = expression(Y[1]^(0)))
     ) +
     labs(title = NULL, x = NULL, y = NULL) +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = "none", 
-          axis.title.x = element_text(size = 18),
+          axis.title.x = element_blank(),
           axis.title.y = element_text(size = 18),
-          axis.text.x = element_text(size = 14),
+          axis.text.x = element_blank(),
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
+  
+  ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 logarithmic_equi_conf_plot <- function(F, Y) {
@@ -671,25 +695,26 @@ logarithmic_equi_conf_plot <- function(F, Y) {
   
   ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1.5) +
-    geom_text(aes(label = labels[group]), hjust = 0.5, vjust = -1, parse = TRUE, size = 5) +  # Adjusted vjust for better separation
+    geom_text(aes(label = labels[group]), hjust = 0.5, vjust = -1, parse = TRUE, size = 7) +  # Adjusted vjust for better separation
     geom_line(aes(linetype = group), size = 0.8) +
     geom_line(data = data.frame(time = c(0, 1), value = c(log_F_1, log_Y_0_t), group = 'Y_0_t'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
     geom_line(data = data.frame(time = c(1, 0), value = c(log_Y_0, log_F_0), group = 'Y_0'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
-    scale_x_continuous(breaks = c(0, 1), labels = c('', '')) +
-    #scale_y_continuous(limits = c(1, 1.4)) +
+    #scale_x_continuous(breaks = c(0, 1), labels = c('', '')) +
+    scale_x_continuous(limits = c(0, 1.25)) +
+    scale_y_continuous(limits = c(1, 1.4)) +
     scale_linetype_manual(
       values = c('log_Y_0' = "solid", 'log_F_0' = "solid", 'log_Y_1' = "solid", 'log_F_1' = "solid", 'log_Y_0_t' = "solid"),
       labels = c('log_Y_0' = expression(Y[0]), 'log_F_0' = expression(E * "[" * F[0] * "]"), 'log_Y_1' = expression(Y[1]), 'log_F_1' = expression(F[1]), 'log_Y_0_t' = expression(Y[1]^(0)))
     ) +
     labs(title = NULL, x = NULL, y = NULL) +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = "none", 
-          axis.title.x = element_text(size = 18),
+          axis.title.x = element_blank(),
           axis.title.y = element_text(size = 18),
-          axis.text.x = element_text(size = 14),
+          axis.text.x = element_blank(),
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
@@ -732,7 +757,7 @@ bias_plot <- function(results_list){
          x = "Time",
          y = "Bias") +
     theme_minimal() +
-    theme(text = element_text(family = "Times New Roman"), 
+    theme(text = element_text(family = "sans"), 
           legend.position = c(0.95, 0.95), # Adjust this to position the legend inside the graph
           legend.justification = c(1, 1), # Adjust this to align the legend box
           legend.text = element_text(size = 16), 
@@ -747,6 +772,8 @@ bias_plot <- function(results_list){
           axis.ticks.length = unit(0.25, "cm")) +
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
+  
+  ggsave(filename = paste0(dir$output, "/bias_sc_eq.pdf"), width = 8, height = 6, dpi = 300)
   
 }
 

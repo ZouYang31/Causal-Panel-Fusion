@@ -17,25 +17,6 @@ library(gurobi)
 
 
 # ------------ define the data driven algorithm -----------------
-# Function to calculate the Mean Squared Error (MSE)
-NSE <- function(F, X, Z, b_F, b_X, b_Z, t_max, dr, dt, i_max, solve_w) {
-  
-  w <- solve_w(F, X, Z, b_F, b_X, b_Z, i_max, t_max, dr, dt)$X
-  
-  # Check the constraints
-  Z_check <- t(w) %*% Z_control
-  X_check <- t(w) %*% X_control
-  F_check <- t(w) %*% F_control
-  
-  # Calculate the NSEs
-  Z_nse <- sum((Z_treated - t(w) %*% Z_control)^2)/dr
-  X_nse <- sum((X_treated - t(w) %*% X_control)^2)/dt
-  F_nse <- sum((F_treated - t(w) %*% F_control)^2)/t_max
-  # Replace this with your actual implementation for NSE(F), NSE(X), and NSE(Z)
-  return(c(F = F_nse, X = X_nse, Z = Z_nse))
-}
-
-
 ### --------------- Algorithm B-list ------------------- ###
 find_best_B <- function(B, F_treated, F_control, X_treated, X_control, Z_treated, Z_control,
                         t_max, dr, dt, i_max, 
@@ -98,7 +79,7 @@ optimize_w_b_gurobi_B_list <- function(par = stop("B missing"),
                                        dr = stop("dr missing"), dt = stop("dt missing"), i_max = stop("i_max missing"), 
                                        NSE_Z_baseline = stop("NSE_Z_baseline missing"), 
                                        NSE_X_baseline = stop("NSE_X_baseline missing"), 
-                                       eta_Z = 10, eta_X = 10) {
+                                       eta_Z = 0.1, eta_X = 0.1) {
   
   J <- i_max - 1
   
@@ -122,16 +103,18 @@ optimize_w_b_gurobi_B_list <- function(par = stop("B missing"),
                b_X/dt * t(X_treated) %*% t(X_control))
   
   ## -------- constraints -------- ##
-  # Quadratic constraints for Z and X
-  Q_Z <- Z_control %*% t(Z_control)
-  L_Z <- -2 * t(matrix(Z_treated)) %*% t(Z_control)
-  #rhs_Z <- dr *  eta_Z * NSE_Z_baseline - sum(Z_treated^2)
-  rhs_Z <- dr * ((1 + eta_Z) * (1 + NSE_Z_baseline) - 1) - sum(Z_treated^2)
+  scale_n = 1
   
-  Q_X <- X_control %*% t(X_control)
-  L_X <- -2 * t(matrix(X_treated)) %*% t(X_control)
+  # Quadratic constraints for Z and X
+  Q_Z <- Z_control %*% t(Z_control) * scale_n
+  L_Z <- -2 * t(matrix(Z_treated)) %*% t(Z_control) * scale_n
+  #rhs_Z <- dr *  eta_Z * NSE_Z_baseline - sum(Z_treated^2)
+  rhs_Z <- dr * ((1 + eta_Z) * (1 + NSE_Z_baseline * scale_n) - 1) - sum(Z_treated^2) * scale_n
+  
+  Q_X <- X_control %*% t(X_control) * scale_n
+  L_X <- -2 * t(matrix(X_treated)) %*% t(X_control) * scale_n
   #rhs_X <- dt * eta_X * NSE_X_baseline - sum(X_treated^2)
-  rhs_X <- dt * ((1 + eta_X) * (1 + NSE_X_baseline) - 1) - sum(X_treated^2)
+  rhs_X <- dt * ((1 + eta_X) * (1 + NSE_X_baseline * scale_n) - 1) - sum(X_treated^2) * scale_n
   
   ## -------- Gurobi Model -------- ##
   model <- list()
@@ -198,91 +181,9 @@ optimize_w_b_gurobi_B_list <- function(par = stop("B missing"),
   return(list(loss.B = loss.B, solution.w = solution.w))
 }
 
+
+
 ### --------------- Backup algorithm ------------------- ###
-
-adaptive_weight_optimization <- function(eta1, eta2, F, X, Z, b_F, b_X, b_Z, t_max, dr, dt, i_max) {
-  # Initialize weights
-  #b_F <- b_X <- b_Z <- 1/3
-  k <- 1
-  init_vals <- NSE(F, X, Z, b_F, b_X, b_Z, t_max = t_max, dr = dr, dt = dt, i_max = i_max,solve_w = solve_w)
-  
-  # Initialize previous sum of NSEs
-  #prev_sum_nse <- b_F*init_vals["F"] + b_Z*init_vals["Z"] + b_X*init_vals["X"]  
-  prev_sum_nse <- init_vals["F"] + init_vals["Z"] + init_vals["X"]
-  #print(paste0("Initial sum NSE: ", prev_sum_nse))
-  prev_N3 <- Inf       # Initialize previous N3 value
-  
-  repeat {
-    # Calculate NSE for F, X, and Z
-    nse_vals <- NSE(F, X, Z, b_F, b_X, b_Z, t_max = t_max, dr = dr, dt = dt, i_max = i_max,solve_w = solve_w)
-    
-    # Extract the sorted NSE values and their associated keys (F, X, Z)
-    nse_sorted <- sort(nse_vals, decreasing = FALSE)
-    N1_key <- names(nse_sorted)[1]  # Smallest NSE
-    N2_key <- names(nse_sorted)[2]  # Middle NSE
-    N3_key <- names(nse_sorted)[3]  # Largest NSE
-    
-    # Extract the corresponding NSE values
-    N1 <- nse_sorted[1]
-    N2 <- nse_sorted[2]
-    N3 <- nse_sorted[3]
-    
-    #print(paste0("Sum NSE: ", N1 + N2 + N3))
-    print(paste0("N1: ", N1))
-    print(paste0("N2: ", N2))
-    print(paste0("N3: ", N3))
-    print(paste0("N3 key: ", N3_key))
-    
-    print(paste0("bF: ", b_F))
-    print(paste0("bZ: ", b_Z))
-    print(paste0("bX: ", b_X))
-    
-    
-    # Check the termination condition
-    if (N3 / N2 > 1 + eta1 && N3 < prev_N3 - eta2) {
-      # Update the weights
-      if (N3_key == "F") {
-        b_F <- b_F + 0.01  # Increase b_F
-        b_X <- b_X - 0.005  # Reduce others
-        b_Z <- b_Z - 0.005
-      } else if (N3_key == "X") {
-        b_X <- b_X + 0.01  # Increase b_X
-        b_F <- b_F - 0.005  # Reduce others
-        b_Z <- b_Z - 0.005
-      } else if (N3_key == "Z") {
-        b_Z <- b_Z + 0.01  # Increase b_Z
-        b_F <- b_F - 0.005  # Reduce others
-        b_X <- b_X - 0.005
-      }
-    } else {
-      break
-    }
-    # Calculate the sum of th NSEs
-    nse_vals <- NSE(F, X, Z, b_F, b_X, b_Z, t_max = t_max, dr = dr, dt = dt, i_max = i_max, solve_w = solve_w)
-    sum_mse <- b_F*nse_vals["F"] + b_Z*nse_vals["Z"] + b_X*nse_vals["X"]
-      
-    # Terminate if the sum of the NSEs stops decreasing
-    # if (sum_mse >= prev_sum_mse) {
-    #     break
-    #   }
-    #   
-    # Update previous sum of MSEs
-    prev_sum_mse <- sum_mse
-    prev_N3 <- N3
-    k <- k + 1
-    print(k)
-      
-    # Optionally, include a condition to stop if k exceeds a threshold to avoid infinite loops
-    if (k > 1000) {
-        break  # Stop after 1000 iterations if not converged
-      }
-    }
-    
-    # Return optimized weights
-    return(list(b_F = b_F, b_X = b_X, b_Z = b_Z))
-}
-
-
 # Data-driven weight optimization algorithm
 ## ------------------------- QCQP with gurobi -------------------------------##
 # Objective function 
