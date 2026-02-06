@@ -180,4 +180,34 @@ NSE_plot_ZXF(combined_results)
 NSE_plot_ZX(combined_results)
 
 
+#------------------------------------------------------------------------#
+##                          Graph Plot                         ###
+#------------------------------------------------------------------------#
+# --------------------------  Bias plot ------------------------------- #
+load(paste0(dir$output, "results_list0228.RData"))
+results_list20 <- results_list
+
+load(paste0(dir$output, "results_list0301.RData"))
+results_list10 <- results_list
+
+sc_result_list <- c(results_list10, results_list20)
+
+load(paste0(dir$output, "results_list_DGP_linear0119.RData"))
+linear_result_list <- results_list
+
+load(paste0(dir$output, "results_list_DGP_log0119.RData"))
+log_result_list <- results_list
+
+combined_results_list <- lapply(1:length(t_max_values), function(i) {
+  list(
+    mean_bias_linear = linear_result_list[[i]]$mean_bias_linear,
+    mean_bias_log = log_result_list[[i]]$mean_bias_log,
+    mean_bias_sc = sc_result_list[[i]]$mean_bias_sc 
+  )
+})
+
+
+
+bias_plot(combined_results_list)
+
 
