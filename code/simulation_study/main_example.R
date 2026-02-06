@@ -181,7 +181,17 @@ synthetic_target_plot(Y = Y, w = w, s_max = s_max, i_max = i_max)
 
 #----------------------    Placebo Test   ---------------------------#
 #--------------------------------------------------------------------#
-Placebo_test(F = F, Y = Y, J = J, t_max = t_max, s_max = s_max, w = w, eta_Z = eta_Z, eta_X = eta_X)
+Placebo_test(F = F, Y = Y, J = J, 
+             t_max = t_max, s_max = s_max, 
+             w = w, 
+             eta_Z = eta_Z, eta_X = eta_X)
+
+Placebo_test_LODO(F = F, Y = Y, J = J, 
+                  t_max = t_max, s_max = s_max, 
+                  w = w, 
+                  eta_Z = eta_Z, eta_X = eta_X)
+
+
 
 
 

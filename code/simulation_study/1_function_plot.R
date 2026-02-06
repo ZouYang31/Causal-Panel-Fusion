@@ -53,7 +53,7 @@ synthetic_reference_plot <- function(F, w, t_max, i_max){
   
   
   # Plot the results - reference domain
-  ggplot(data_all, aes(x = year, y = Outcome, group = Unit)) +
+  p <- ggplot(data_all, aes(x = year, y = Outcome, group = Unit)) +
     geom_line(data = subset(data_all, Unit != "Unit_1" & Unit != "Synthetic_control"), 
               aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.5) +  # Plot grey donor pool lines first
     geom_line(data = subset(data_all, Unit == "Synthetic_control"), 
@@ -94,7 +94,8 @@ synthetic_reference_plot <- function(F, w, t_max, i_max){
         color = c("black", "black", "grey")),
         order = 1))
   
-  ggsave(filename = paste0(dir$output, "/F_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
+  print(p)
+  #ggsave(filename = paste0(dir$output, "/F_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 synthetic_target_plot <- function(Y, w, s_max, i_max){
@@ -140,7 +141,7 @@ synthetic_target_plot <- function(Y, w, s_max, i_max){
   legend_labels <- c("counterfactual target unit", "synthetic control target unit", "observed target unit", "donor pool units")
   
   # Plot the results - reference domain
-  ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
+  p <- ggplot(data_all, aes(x = year, y = Outcome, group = Unit, color = Unit, linetype = Unit)) +
     geom_line(data = subset(data_all, !Unit %in% c("Unit_1", "Synthetic_control", "Observed_target")), 
               aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.5) +  # Grey donor pool lines first
     geom_line(data = subset(data_all, Unit == "Synthetic_control"), 
@@ -183,7 +184,8 @@ synthetic_target_plot <- function(Y, w, s_max, i_max){
         color = c("red", "black","black", "grey")),
         order = 1))
   
-  ggsave(filename = paste0(dir$output, "/Y_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
+  print(p)
+  #ggsave(filename = paste0(dir$output, "/Y_plot_multilines.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 
@@ -213,7 +215,7 @@ linear_equi_conf_plot <- function(F, Y){
   labels <- c('Y_0' = "E * '[' * Y[0] * ']'", 'F_0' = "E * '[' * F[0] * ']'", 'Y_1' = "E * '[' * Y[1] * ']'", 'F_1' = "E * '[' * F[1] * ']'", 'Y_0_t' = "E * '[' * Y[1]^(0) * ']'")
   
   # Plot with modified expression
-  ggplot(data, aes(x = time, y = value)) +
+  p <- ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1.5) +
     geom_text(aes(label = labels[group]), hjust = 0.5, vjust = 0, parse = TRUE, size = 5) +  # Adding labels to points
     geom_line(aes(linetype = group), size = 0.8) +
@@ -238,7 +240,8 @@ linear_equi_conf_plot <- function(F, Y){
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
   
-  ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
+  print(p)
+  #ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 logorithmic_equi_conf_plot <- function(F, Y){
@@ -263,7 +266,7 @@ logorithmic_equi_conf_plot <- function(F, Y){
   labels <- c('Y_0' = "log(E * '[' * Y[0] * ']')", 'F_0' = "log(E * '[' * F[0] * ']')", 'Y_1' = "log(E * '[' * Y[1] * ']')", 'F_1' = "log(E * '[' * F[1] * ']')", 'Y_0_t' = "log(E * '[' * Y[1]^(0) * ']')")
   
   # Plot with modified expression
-  ggplot(data, aes(x = time, y = value)) +
+  p <- ggplot(data, aes(x = time, y = value)) +
     geom_point(size = 1.5) +
     geom_text(aes(
       label = labels[group], 
@@ -294,7 +297,8 @@ logorithmic_equi_conf_plot <- function(F, Y){
           plot.margin = margin(30, 60, 10, 10)) +  # Added margin to prevent label cutoff
     theme(legend.title = element_blank())
   
-  ggsave(filename = paste0(dir$output, "/log_eq.pdf"), width = 8, height = 6, dpi = 300)
+  print(p)
+  #ggsave(filename = paste0(dir$output, "/log_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 
@@ -348,7 +352,8 @@ NSE_plot_ZXF <- function(results_list){
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
   
-  ggsave(filename = paste0(dir$output, "/nse_mu_Z_X_F.pdf"), width = 8, height = 6, dpi = 300)
+  #ggsave(filename = paste0(dir$output, "/nse_mu_Z_X_F_DGP_linear.pdf"), width = 8, height = 6, dpi = 300)
+  
   
 }
 
@@ -398,7 +403,7 @@ NSE_plot_ZX <- function(results_list){
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
   
-  ggsave(filename = paste0(dir$output, "/nse_mu_Z_X.pdf"), width = 8, height = 6, dpi = 300)
+ # ggsave(filename = paste0(dir$output, "/nse_mu_Z_X_DGP_linear.pdf"), width = 8, height = 6, dpi = 300)
   
 }
 
@@ -406,6 +411,7 @@ NSE_plot_ZX <- function(results_list){
 
 # ------------------------------------------------------------------- #
 # ----------------------- Placebo Test Plot  ------------------------ #
+# Placebo test: a leave-one-donor out  
 
 Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
   
@@ -421,18 +427,8 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
   
   F_treated <- F[1, ]
   F_control <- F[2:(J+1), ]
-  # Calculate the baseline X and Z
-  result_X <- optimize_w_ipop(F_treated = F_treated, F_control = F_control, 
-                              X, Z, t_max, dr, dt, i_max, target = "X")
-  wX <- result_X$weights
-  NSE_X_baseline <- NSE_x(wX, F, X, Z, t_max, dr, dt, i_max, target = "X")
-  print(NSE_X_baseline)
   
-  result_Z <- optimize_w_ipop(F_treated = F_treated, F_control = F_control, 
-                              X, Z, t_max, dr, dt, i_max, target = "Z")
-  wZ <- result_Z$weights
-  NSE_Z_baseline <- NSE_x(wZ, F, X, Z, t_max, dr, dt, i_max, target = "Z")
-  print(NSE_Z_baseline)
+  # Placebo test
   
   for (placebo_unit in placebo_units) {
     print(placebo_unit)
@@ -448,6 +444,31 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
     Z_placebo_treated <- Z[placebo_unit, ]
     Z_placebo_control <- Z[-placebo_unit, ]
     
+    X_reordered <- rbind(X_placebo_treated, X_placebo_control)
+    Z_reordered <- rbind(Z_placebo_treated, Z_placebo_control)
+    F_reordered <- rbind(F_placebo_treated, F_placebo_control)
+    Y_reordered <- rbind(Y_placebo_treated, Y_placebo_control)
+    
+    # Calculate the baseline X and Z
+    result_X <- optimize_w_ipop(F_treated = F_placebo_treated, F_control = F_placebo_control, 
+                                X = X_reordered, Z = Z_reordered, 
+                                t_max, dr, dt, i_max, target = "X")
+    wX <- result_X$weights
+    NSE_X_baseline <- NSE_x(wX, F_reordered, 
+                            X = X_reordered, Z = Z_reordered,
+                            t_max, dr, dt, i_max, target = "X")
+    print(NSE_X_baseline)
+    
+    result_Z <- optimize_w_ipop(F_treated = F_placebo_treated, F_control = F_placebo_control,
+                                X = X_reordered, Z = Z_reordered, 
+                                t_max, dr, dt, i_max, target = "Z")
+    wZ <- result_Z$weights
+    NSE_Z_baseline <- NSE_x(wZ, F_reordered, 
+                            X = X_reordered, Z = Z_reordered,
+                            t_max, dr, dt, i_max, target = "Z")
+    print(NSE_Z_baseline)
+    
+    ## Find the best B
     b_list <- find_best_B(B, F_treated = F_placebo_treated, F_control = F_placebo_control,
                           X_treated = X_placebo_treated, X_control = X_placebo_control,
                           Z_treated = Z_placebo_treated, Z_control = Z_placebo_control,
@@ -566,7 +587,7 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
            linetype = guide_legend(title = NULL, override.aes = list(color = c("black", "grey")), 
                                    order = 1))
   
-  ggsave(filename = paste0(dir$output, "/placebo_F.pdf"), width = 8, height = 6, dpi = 300)
+  #ggsave(filename = paste0(dir$output, "/placebo_F.pdf"), width = 8, height = 6, dpi = 300)
   
   legend_breaks <- c("Synthetic_Treated_Y", "Unit_2")  # Add "Unit_2" to represent control units
   legend_labels <- c("target unit", "control units")
@@ -604,11 +625,862 @@ Placebo_test <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X){ #X, Z, dr, dt
            linetype = guide_legend(title = NULL, override.aes = list(color = c("black", "grey")), 
                                    order = 1))
 
-  ggsave(filename = paste0(dir$output, "/placebo_Y.pdf"), width = 8, height = 6, dpi = 300)
+  #ggsave(filename = paste0(dir$output, "/placebo_Y.pdf"), width = 8, height = 6, dpi = 300)
   print(plot_F)
   print(plot_Y)
 }
 
+##--------------Placebo test - leave one donor out - ----------------##
+Placebo_test_LODO <- function(F, Y, J, t_max, s_max, w, eta_Z, eta_X) {
+  
+  # ============================================================================
+  # Key Difference from Standard Placebo Test:
+  # - Standard: Tests ALL control units as placebo
+  # - LODO: Only leave out donors with NON-ZERO weights from original SC
+  # ============================================================================
+  
+  # Identify donors with non-zero weights (threshold: > 0.005)
+  nonzero_indices <- which(w > 0.005)  # Indices in w (1 to J)
+  nonzero_donor_units <- nonzero_indices + 1  # Convert to actual unit indices (2 to i_max)
+  
+  print(paste("Non-zero weight donors:", length(nonzero_donor_units)))
+  print(paste("Donor units:", paste(nonzero_donor_units, collapse = ", ")))
+  print(paste("Weights:", paste(round(w[nonzero_indices], 4), collapse = ", ")))
+  
+  # Synthetic control for actual treated unit (for comparison)
+  synthetic_treated_F <- t(w) %*% F[2:(J+1), ]
+  synthetic_treated_Y <- t(w) %*% Y[2:(J+1), ]
+  
+  # Initialize lists to store synthetic placebo outcomes
+  synthetic_placebo_list_F <- list()
+  synthetic_placebo_list_Y <- list()
+  
+  # ============================================================================
+  # LODO Placebo Test Loop - Only for non-zero weight donors
+  # ============================================================================
+  
+  for (left_out_donor in nonzero_donor_units) {
+    print(paste(""))
+    print(paste("================================================="))
+    print(paste("Leaving out donor unit:", left_out_donor))
+    print(paste("================================================="))
+    
+    # ========================================================================
+    # Donor pool: ALL control units EXCEPT the left-out donor
+    # This includes Unit 1 (treated) as the "placebo treated"
+    # ========================================================================
+    
+    # Use Unit 1 as treated, but remove the left-out donor from controls
+    donor_indices <- setdiff(2:i_max, left_out_donor)
+    
+    # Extract treated unit data (Unit 1)
+    F_treated <- F[1, ]
+    Y_treated <- Y[1, ]
+    X_treated <- X[1, ]
+    Z_treated <- Z[1, ]
+    
+    # Extract donor pool data (all controls except left-out donor)
+    F_control <- F[donor_indices, ]
+    Y_control <- Y[donor_indices, ]
+    X_control <- X[donor_indices, ]
+    Z_control <- Z[donor_indices, ]
+    
+    # Reorder for optimize_w_ipop (treated first, then controls)
+    X_reordered <- rbind(X_treated, X_control)
+    Z_reordered <- rbind(Z_treated, Z_control)
+    F_reordered <- rbind(F_treated, F_control)
+    
+    # ========================================================================
+    # Calculate baseline NSE for this configuration
+    # ========================================================================
+    
+    result_X <- optimize_w_ipop(F_treated = F_treated, 
+                                F_control = F_control, 
+                                X = X_reordered,
+                                Z = Z_reordered,
+                                t_max, dr, dt, 
+                                i_max = length(donor_indices) + 1, 
+                                target = "X")
+    wX <- result_X$weights
+    NSE_X_baseline <- NSE_x(wX, F_reordered, X_reordered, Z_reordered, 
+                            t_max, dr, dt, 
+                            length(donor_indices) + 1, 
+                            target = "X")
+    
+    result_Z <- optimize_w_ipop(F_treated = F_treated, 
+                                F_control = F_control, 
+                                X = X_reordered,
+                                Z = Z_reordered,
+                                t_max, dr, dt, 
+                                i_max = length(donor_indices) + 1, 
+                                target = "Z")
+    wZ <- result_Z$weights
+    NSE_Z_baseline <- NSE_x(wZ, F_reordered, X_reordered, Z_reordered, 
+                            t_max, dr, dt, 
+                            length(donor_indices) + 1, 
+                            target = "Z")
+    
+    print(paste("NSE_X:", round(NSE_X_baseline, 6)))
+    print(paste("NSE_Z:", round(NSE_Z_baseline, 6)))
+    
+    # ========================================================================
+    # Find optimal weights WITHOUT the left-out donor
+    # ========================================================================
+    
+    b_list <- find_best_B(B, 
+                          F_treated = F_treated, 
+                          F_control = F_control,
+                          X_treated = X_treated, 
+                          X_control = X_control,
+                          Z_treated = Z_treated, 
+                          Z_control = Z_control,
+                          t_max, dr, dt, 
+                          i_max = length(donor_indices) + 1, 
+                          NSE_Z_baseline = NSE_Z_baseline, 
+                          NSE_X_baseline = NSE_X_baseline, 
+                          eta_Z = eta_Z, 
+                          eta_X = eta_X) 
+    
+    w_lodo <- b_list$best_w_star
+    
+    # Check if weights are valid
+    if (is.null(w_lodo)) {
+      warning(paste("w_lodo is NULL when leaving out donor", left_out_donor, ". Skipping."))
+      next
+    }
+    
+    print(paste("New weights (top 8):", 
+                paste(round(sort(w_lodo, decreasing = TRUE)[1:min(8, length(w_lodo))], 8), 
+                      collapse = ", ")))
+    
+    # ========================================================================
+    # Construct synthetic control and compute effect WITHOUT left-out donor
+    # ========================================================================
+    
+    # Reference domain (F)
+    synthetic_F_lodo <- t(w_lodo) %*% F[donor_indices, ]
+    effect_F <- F[1, ] - synthetic_F_lodo
+    synthetic_placebo_list_F[[paste0("Left_out_", left_out_donor)]] <- effect_F
+    
+    # Target domain (Y)
+    synthetic_Y_lodo <- t(w_lodo) %*% Y[donor_indices, ]
+    effect_Y <- Y[1, ] - synthetic_Y_lodo
+    synthetic_placebo_list_Y[[paste0("Left_out_", left_out_donor)]] <- effect_Y
+  }
+  
+  # ============================================================================
+  # Combine results into data frames
+  # ============================================================================
+  
+  # Reference domain LODO effects
+  synthetic_placebo_df_F <- do.call(rbind, lapply(names(synthetic_placebo_list_F), function(unit) {
+    data.frame(
+      year = 1:t_max,
+      Outcome = as.numeric(synthetic_placebo_list_F[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  # Target domain LODO effects
+  synthetic_placebo_df_Y <- do.call(rbind, lapply(names(synthetic_placebo_list_Y), function(unit) {
+    data.frame(
+      year = 1:s_max,
+      Outcome = as.numeric(synthetic_placebo_list_Y[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  # ============================================================================
+  # Add actual treated unit effect (using ALL donors)
+  # ============================================================================
+  
+  # Reference domain: Actual treated unit effect
+  synthetic_placebo_df_F <- rbind(synthetic_placebo_df_F, data.frame(
+    year = 1:t_max,
+    Outcome = as.numeric(F[1, ] - synthetic_treated_F),
+    Unit = "Original_SC"
+  ))
+  
+  # Target domain: Actual treated unit effect (with causal effect if available)
+  if (exists("causal")) {
+    # Add causal effect to BOTH original SC and all LODO effects
+    synthetic_placebo_df_Y$Outcome <- synthetic_placebo_df_Y$Outcome + causal
+    outcome_Y <- Y[1, ] + causal - synthetic_treated_Y
+  } else {
+    outcome_Y <- Y[1, ] - synthetic_treated_Y
+  }
+  
+  synthetic_placebo_df_Y <- rbind(synthetic_placebo_df_Y, data.frame(
+    year = 1:s_max,
+    Outcome = as.numeric(outcome_Y),
+    Unit = "Original_SC"
+  ))
+  
+  # ============================================================================
+  # Create visualizations
+  # ============================================================================
+  
+  # Color and line type mappings for F
+  color_map_F <- c("Original_SC" = "black")
+  line_type_map_F <- c("Original_SC" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_F$Unit)) {
+    if (!unit %in% names(color_map_F)) {
+      color_map_F[unit] <- scales::alpha("grey", 0.6) 
+      line_type_map_F[unit] <- "solid"
+    }
+  }
+  
+  # Color and line type mappings for Y
+  color_map_Y <- c("Original_SC" = "black")
+  line_type_map_Y <- c("Original_SC" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_Y$Unit)) {
+    if (!unit %in% names(color_map_Y)) {
+      color_map_Y[unit] <- scales::alpha("grey", 0.6)
+      line_type_map_Y[unit] <- "solid"
+    }
+  }
+  
+  # Legend configuration
+  legend_breaks <- c("Original_SC", names(synthetic_placebo_list_F)[1])
+  legend_labels <- c("Original SC", "LODO (leave one donor out)")
+  
+  # ============================================================================
+  # Plot for Reference Domain (F)
+  # ============================================================================
+  
+  plot_F <- ggplot(synthetic_placebo_df_F, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_F, Unit != "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +
+    geom_line(data = subset(synthetic_placebo_df_F, Unit == "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 1.2) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) +
+    scale_color_manual(values = color_map_F, 
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_F, 
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = c(-10, 10)) +
+    labs(title = "", 
+         x = "Time", 
+         y = "Causal Effect", 
+         color = "Legend", 
+         linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"), 
+          legend.position = c(0.95, 0.1), 
+          legend.justification = c(1, 1), 
+          legend.text = element_text(size = 12), 
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"), 
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = scales::alpha("grey", 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL),
+           linetype = guide_legend(title = NULL))
+  
+  # ============================================================================
+  # Plot for Target Domain (Y)
+  # ============================================================================
+  
+  plot_Y <- ggplot(synthetic_placebo_df_Y, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_Y, Unit != "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +
+    geom_line(data = subset(synthetic_placebo_df_Y, Unit == "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 1.2) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) +
+    scale_color_manual(values = color_map_Y, 
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_Y, 
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = c(-6, 8)) +
+    labs(title = "", 
+         x = "Time", 
+         y = "Causal Effect", 
+         color = "Legend", 
+         linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"), 
+          legend.position = c(0.95, 0.1), 
+          legend.justification = c(1, 1), 
+          legend.text = element_text(size = 12), 
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"), 
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = scales::alpha('grey', 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL),
+           linetype = guide_legend(title = NULL))
+  
+  # ============================================================================
+  # Display plots
+  # ============================================================================
+  
+  print(plot_F)
+  print(plot_Y)
+  
+  # ============================================================================
+  # Return results
+  # ============================================================================
+  
+  return(list(
+    placebo_effects_F = synthetic_placebo_df_F,
+    placebo_effects_Y = synthetic_placebo_df_Y,
+    plot_F = plot_F,
+    plot_Y = plot_Y,
+    nonzero_donors = nonzero_donor_units,
+    num_lodo_tests = length(nonzero_donor_units)
+  ))
+}
+
+## ------------ placebo test on real data  -----------------------  ##
+placebo_test_data<- function(F, Y, t_max, s_max, i_max,
+                             w, X, Z, dr, dt,
+                             eta_Z = 0.1, eta_X = 0.1,
+                             Ylab = c("Causal Effect"),
+                             Xlab = c("Time"),
+                             ref_lim = c(-0.1, 0.1),
+                             tar_lim = c(-0.5, 0.5),
+                             Tunit_lab = c("Chelsea"),
+                             Cunit_lab = c("19 Cities") ){
+  
+  # Select all control units as placebo treated units
+  placebo_units <- 2:i_max
+  J <- i_max - 1
+  
+  synthetic_treated_F <- t(w) %*% F[2:(J+1), ]
+  synthetic_treated_Y <- t(w) %*% Y[2:(J+1), ]
+  
+  # Initialize lists to store synthetic placebo outcomes
+  synthetic_placebo_list_F <- list()
+  synthetic_placebo_list_Y <- list()
+  
+  F_treated <- F[1, ]
+  F_control <- F[2:(J+1), ]
+
+  
+  for (placebo_unit in placebo_units) {
+    print(placebo_unit)
+    F_placebo_treated <- F[placebo_unit, ]
+    F_placebo_control <- F[-placebo_unit, ]
+    
+    Y_placebo_treated <- Y[placebo_unit, ]
+    Y_placebo_control <- Y[-placebo_unit, ]
+    
+    X_placebo_treated <- X[placebo_unit, ]
+    X_placebo_control <- X[-placebo_unit, ]
+    
+    Z_placebo_treated <- Z[placebo_unit, ]
+    Z_placebo_control <- Z[-placebo_unit, ]
+    
+    # Calculate the baseline X and Z
+    X_reordered <- rbind(X_placebo_treated, X_placebo_control)
+    Z_reordered <- rbind(Z_placebo_treated, Z_placebo_control)
+    F_reordered <- rbind(F_placebo_treated, F_placebo_control)
+    Y_reordered <- rbind(Y_placebo_treated, Y_placebo_control)
+    
+    # Calculate the baseline X and Z
+    result_X <- optimize_w_ipop(F_treated = F_placebo_treated, F_control = F_placebo_control, 
+                                X = X_reordered, Z = Z_reordered, 
+                                t_max, dr, dt, i_max, target = "X")
+    wX <- result_X$weights
+    NSE_X_baseline <- NSE_x(wX, F_reordered, 
+                            X = X_reordered, Z = Z_reordered,
+                            t_max, dr, dt, i_max, target = "X")
+    print(NSE_X_baseline)
+    
+    result_Z <- optimize_w_ipop(F_treated = F_placebo_treated, F_control = F_placebo_control,
+                                X = X_reordered, Z = Z_reordered, 
+                                t_max, dr, dt, i_max, target = "Z")
+    wZ <- result_Z$weights
+    NSE_Z_baseline <- NSE_x(wZ, F_reordered, 
+                            X = X_reordered, Z = Z_reordered,
+                            t_max, dr, dt, i_max, target = "Z")
+    print(NSE_Z_baseline)
+    
+    b_list <- find_best_B(B, F_treated = F_placebo_treated, F_control = F_placebo_control,
+                          X_treated = X_placebo_treated, X_control = X_placebo_control,
+                          Z_treated = Z_placebo_treated, Z_control = Z_placebo_control,
+                          t_max, dr, dt, i_max,
+                          NSE_Z_baseline = NSE_Z_baseline, NSE_X_baseline = NSE_X_baseline,
+                          eta_Z= eta_Z, eta_X= eta_X)
+    # Solve for W
+    w_placebo <- b_list$best_w_star
+    
+    if (is.null(w_placebo)) {
+      # Define default behavior when w_placebo is NULL
+      warning(paste("w_placebo is NULL for unit", placebo_unit, ". Skipping this unit."))
+      next # Skip to the next iteration of the loop
+    }
+    
+    synthetic_placebo_treated_F <- t(w_placebo) %*% F[-placebo_unit, ]
+    effect_F <- F[placebo_unit, ] - synthetic_placebo_treated_F
+    
+    synthetic_placebo_list_F[[paste0("Unit_", placebo_unit)]] <- effect_F
+    
+    synthetic_placebo_treated_Y <- t(w_placebo) %*% Y[-placebo_unit, ]
+    
+    effect_Y <- Y[placebo_unit, ] - synthetic_placebo_treated_Y
+    synthetic_placebo_list_Y[[paste0("Unit_", placebo_unit)]] <- effect_Y
+  }
+  
+  # Combine the synthetic placebo outcomes into data frames
+  synthetic_placebo_df_F <- do.call(rbind, lapply(names(synthetic_placebo_list_F), function(unit) {
+    data.frame(
+      year = 1:t_max,
+      Outcome = as.numeric(synthetic_placebo_list_F[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  synthetic_placebo_df_Y <- do.call(rbind, lapply(names(synthetic_placebo_list_Y), function(unit) {
+    data.frame(
+      year = 1:s_max,
+      Outcome = as.numeric(synthetic_placebo_list_Y[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  # Highlight the treated unit (Unit_1)
+  synthetic_placebo_df_F <- rbind(synthetic_placebo_df_F, data.frame(
+    year = 1:t_max,
+    Outcome = as.numeric(F[1,] - synthetic_treated_F),
+    Unit = "Synthetic_Treated_F"
+  ))
+  
+  synthetic_placebo_df_Y <- rbind(synthetic_placebo_df_Y, data.frame(
+    year = 1:s_max,
+    Outcome = as.numeric(Y[1,] - synthetic_treated_Y),
+    Unit = "Synthetic_Treated_Y"
+  ))
+  
+  color_map_F <- c("Synthetic_Treated_F" = "black")
+  line_type_map_F <- c("Synthetic_Treated_F" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_F$Unit)) {
+    if (!unit %in% names(color_map_F)) {
+      color_map_F[unit] <- scales::alpha("grey", 0.6)
+      line_type_map_F[unit] <- "solid"
+    }
+  }
+  
+  color_map_Y <- c("Synthetic_Treated_Y" = "black")
+  line_type_map_Y <- c("Synthetic_Treated_Y" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_Y$Unit)) {
+    if (!unit %in% names(color_map_Y)) {
+      color_map_Y[unit] <- scales::alpha("grey", 0.6)
+      line_type_map_Y[unit] <- "solid"
+    }
+  }
+  
+  # Custom legend breaks and labels
+  legend_breaks <- c("Synthetic_Treated_F", "Unit_2")  # Add "Unit_2" to represent control units
+  legend_labels <- c(Tunit_lab, Cunit_lab)
+  
+  # Create the plots
+  plot_F <- ggplot(synthetic_placebo_df_F, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_F, !Unit %in% c("Synthetic_Treated_F")),
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +  # Grey control lines first
+    geom_line(data = subset(synthetic_placebo_df_F, Unit == "Synthetic_Treated_F"),
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Solid black line on top
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) + # Line at y = 0
+    scale_color_manual(values = color_map_F,
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_F,
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = ref_lim) +
+    labs(title = NULL, x = Xlab, y = Ylab, color = "Legend", linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"),
+          legend.position = c(0.95, 0.1),
+          legend.justification = c(1, 1),
+          legend.text = element_text(size = 14),
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"),
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = ggplot2::alpha("grey", 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL, override.aes = list(linetype = c("solid", "solid"),
+                                                                  color = c("black", "grey")),
+                                order = 1),
+           linetype = guide_legend(title = NULL,
+                                   order = 1))
+  
+  legend_breaks <- c("Synthetic_Treated_Y", "Unit_2")  # Add "Unit_2" to represent control units
+  legend_labels <- c(Tunit_lab, Cunit_lab)
+  
+  plot_Y <- ggplot(synthetic_placebo_df_Y, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_Y, !Unit %in% c("Synthetic_Treated_Y")),
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +  # Grey control lines first
+    geom_line(data = subset(synthetic_placebo_df_Y, Unit == "Synthetic_Treated_Y"),
+              aes(color = Unit, linetype = Unit), size = 0.8) +  # Solid black line on top
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) + # Line at y = 0
+    scale_color_manual(values = color_map_Y,
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_Y,
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = tar_lim) +
+    labs(title = NULL, x = Xlab, y = Ylab, color = "Legend", linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"),
+          legend.position = c(0.95, 0.1),
+          legend.justification = c(1, 1),
+          legend.text = element_text(size = 14),
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"),
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = ggplot2::alpha('grey', 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL, override.aes = list(linetype = c("solid", "solid"),
+                                                                  color = c("black", "grey")),
+                                order = 1),
+           linetype = guide_legend(title = NULL,
+                                   order = 1))
+  
+  
+  return(list(plot_F = plot_F, plot_Y = plot_Y))
+}
+
+placebo_test_LODO_data <- function(F, Y, t_max, s_max, i_max,
+                                   w, X, Z, dr, dt,
+                                   eta_Z = 0.1, eta_X = 0.1,
+                                   Ylab = c("Causal Effect"),
+                                   Xlab = c("Time"),
+                                   ref_lim = c(-0.1, 0.1),
+                                   tar_lim = c(-0.5, 0.5),
+                                   Tunit_lab = ('Original synthetic Chelsea'),
+                                   Cunit_lab = c("Leave-one-out syntheic Chlesea") ){
+  
+  # ============================================================================
+  # Key Difference from Standard Placebo Test:
+  # - Standard: Tests ALL control units as placebo
+  # - LODO: Only leave out donors with NON-ZERO weights from original SC
+  # ============================================================================
+  
+  J <- i_max - 1
+  
+  # Identify donors with non-zero weights (threshold: > 0.005)
+  nonzero_indices <- which(w > 0.005)  # Indices in w (1 to J)
+  nonzero_donor_units <- nonzero_indices + 1  # Convert to actual unit indices (2 to i_max)
+  
+  print(paste("Non-zero weight donors:", length(nonzero_donor_units)))
+  print(paste("Donor units:", paste(nonzero_donor_units, collapse = ", ")))
+  print(paste("Weights:", paste(round(w[nonzero_indices], 4), collapse = ", ")))
+  
+  # Synthetic control for actual treated unit (uses ALL control units)
+  synthetic_treated_F <- t(w) %*% F[2:(J+1), ]
+  synthetic_treated_Y <- t(w) %*% Y[2:(J+1), ]
+  
+  # Initialize lists to store synthetic placebo outcomes
+  synthetic_placebo_list_F <- list()
+  synthetic_placebo_list_Y <- list()
+  
+  # ============================================================================
+  # LODO Test Loop - Only for non-zero weight donors
+  # ============================================================================
+  
+  for (left_out_donor in nonzero_donor_units) {
+    print(paste(""))
+    print(paste("================================================="))
+    print(paste("Leaving out donor unit:", left_out_donor))
+    print(paste("================================================="))
+    
+    # ========================================================================
+    # Donor pool: ALL control units EXCEPT the left-out donor
+    # This uses Unit 1 as treated
+    # ========================================================================
+    
+    # Use Unit 1 as treated, but remove the left-out donor from controls
+    donor_indices <- setdiff(2:i_max, left_out_donor)
+    
+    # Extract treated unit data (Unit 1)
+    F_treated <- F[1, ]
+    Y_treated <- Y[1, ]
+    X_treated <- X[1, ]
+    Z_treated <- Z[1, ]
+    
+    # Extract donor pool data (all controls except left-out donor)
+    F_control <- F[donor_indices, ]
+    Y_control <- Y[donor_indices, ]
+    X_control <- X[donor_indices, ]
+    Z_control <- Z[donor_indices, ]
+    
+    # Reorder for optimize_w_ipop (treated first, then controls)
+    X_reordered <- rbind(X_treated, X_control)
+    Z_reordered <- rbind(Z_treated, Z_control)
+    F_reordered <- rbind(F_treated, F_control)
+    
+    # ========================================================================
+    # Calculate baseline NSE for this configuration
+    # ========================================================================
+    
+    result_X <- optimize_w_ipop(F_treated = F_treated, 
+                                F_control = F_control, 
+                                X = X_reordered,
+                                Z = Z_reordered,
+                                t_max, dr, dt, 
+                                i_max = length(donor_indices) + 1, 
+                                target = "X")
+    wX <- result_X$weights
+    NSE_X_baseline <- NSE_x(wX, F_reordered, X_reordered, Z_reordered, 
+                            t_max, dr, dt, 
+                            length(donor_indices) + 1, 
+                            target = "X")
+    
+    result_Z <- optimize_w_ipop(F_treated = F_treated, 
+                                F_control = F_control, 
+                                X = X_reordered,
+                                Z = Z_reordered,
+                                t_max, dr, dt, 
+                                i_max = length(donor_indices) + 1, 
+                                target = "Z")
+    wZ <- result_Z$weights
+    NSE_Z_baseline <- NSE_x(wZ, F_reordered, X_reordered, Z_reordered, 
+                            t_max, dr, dt, 
+                            length(donor_indices) + 1, 
+                            target = "Z")
+    
+    print(paste("NSE_X:", round(NSE_X_baseline, 6)))
+    print(paste("NSE_Z:", round(NSE_Z_baseline, 6)))
+    
+    # ========================================================================
+    # Find optimal weights WITHOUT the left-out donor
+    # ========================================================================
+    
+    b_list <- find_best_B(B, 
+                          F_treated = F_treated, 
+                          F_control = F_control,
+                          X_treated = X_treated, 
+                          X_control = X_control,
+                          Z_treated = Z_treated, 
+                          Z_control = Z_control,
+                          t_max, dr, dt, 
+                          i_max = length(donor_indices) + 1, 
+                          NSE_Z_baseline = NSE_Z_baseline, 
+                          NSE_X_baseline = NSE_X_baseline, 
+                          eta_Z = eta_Z, 
+                          eta_X = eta_X)
+    
+    w_lodo <- b_list$best_w_star
+    
+    # Check if weights are valid
+    if (is.null(w_lodo)) {
+      warning(paste("w_lodo is NULL when leaving out donor", left_out_donor, ". Skipping."))
+      next
+    }
+    
+    print(paste("New weights (top 5):", 
+                paste(round(sort(w_lodo, decreasing = TRUE)[1:min(5, length(w_lodo))], 4), 
+                      collapse = ", ")))
+    
+    # ========================================================================
+    # Construct synthetic control and compute effect WITHOUT left-out donor
+    # ========================================================================
+    
+    # Reference domain (F)
+    synthetic_F_lodo <- t(w_lodo) %*% F[donor_indices, ]
+    effect_F <- F[1, ] - synthetic_F_lodo
+    synthetic_placebo_list_F[[paste0("Left_out_", left_out_donor)]] <- effect_F
+    
+    # Target domain (Y)
+    synthetic_Y_lodo <- t(w_lodo) %*% Y[donor_indices, ]
+    effect_Y <- Y[1, ] - synthetic_Y_lodo
+    synthetic_placebo_list_Y[[paste0("Left_out_", left_out_donor)]] <- effect_Y
+  }
+  
+  # ============================================================================
+  # Combine results into data frames
+  # ============================================================================
+  
+  # Reference domain LODO effects
+  synthetic_placebo_df_F <- do.call(rbind, lapply(names(synthetic_placebo_list_F), function(unit) {
+    data.frame(
+      year = 1:t_max,
+      Outcome = as.numeric(synthetic_placebo_list_F[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  # Target domain LODO effects
+  synthetic_placebo_df_Y <- do.call(rbind, lapply(names(synthetic_placebo_list_Y), function(unit) {
+    data.frame(
+      year = 1:s_max,
+      Outcome = as.numeric(synthetic_placebo_list_Y[[unit]]),
+      Unit = unit
+    )
+  }))
+  
+  # ============================================================================
+  # Add actual treated unit effect (using ALL donors)
+  # ============================================================================
+  
+  # Reference domain: Actual treated unit effect (no causal - it's reference domain)
+  synthetic_placebo_df_F <- rbind(synthetic_placebo_df_F, data.frame(
+    year = 1:t_max,
+    Outcome = as.numeric(F[1, ] - synthetic_treated_F),
+    Unit = "Original_SC"
+  ))
+  
+  # Target domain: Actual treated unit effect (real data, no causal to add)
+  synthetic_placebo_df_Y <- rbind(synthetic_placebo_df_Y, data.frame(
+    year = 1:s_max,
+    Outcome = as.numeric(Y[1, ] - synthetic_treated_Y),
+    Unit = "Original_SC"
+  ))
+  
+  # ============================================================================
+  # Create visualizations
+  # ============================================================================
+  
+  # Color and line type mappings for F
+  color_map_F <- c("Original_SC" = "black")
+  line_type_map_F <- c("Original_SC" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_F$Unit)) {
+    if (!unit %in% names(color_map_F)) {
+      color_map_F[unit] <- scales::alpha("grey", 0.6) 
+      line_type_map_F[unit] <- "solid"
+    }
+  }
+  
+  # Color and line type mappings for Y
+  color_map_Y <- c("Original_SC" = "black")
+  line_type_map_Y <- c("Original_SC" = "solid")
+  
+  for (unit in unique(synthetic_placebo_df_Y$Unit)) {
+    if (!unit %in% names(color_map_Y)) {
+      color_map_Y[unit] <- scales::alpha("grey", 0.6)
+      line_type_map_Y[unit] <- "solid"
+    }
+  }
+  
+  # Legend configuration
+  legend_breaks <- c("Original_SC", names(synthetic_placebo_list_F)[1])
+  legend_labels <- c(Tunit_lab, paste0(Cunit_lab, " (LODO)"))
+  
+  # ============================================================================
+  # Plot for Reference Domain (F)
+  # ============================================================================
+  
+  plot_F <- ggplot(synthetic_placebo_df_F, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_F, Unit != "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +
+    geom_line(data = subset(synthetic_placebo_df_F, Unit == "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 1.2) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) +
+    scale_color_manual(values = color_map_F, 
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_F, 
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = ref_lim) +
+    labs(title = NULL, 
+         x = Xlab, 
+         y = Ylab, 
+         color = "Legend", 
+         linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"), 
+          legend.position = c(0.95, 0.1), 
+          legend.justification = c(1, 1), 
+          legend.text = element_text(size = 14), 
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"), 
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = scales::alpha("grey", 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL),
+           linetype = guide_legend(title = NULL))
+  
+  # ============================================================================
+  # Plot for Target Domain (Y)
+  # ============================================================================
+  
+  plot_Y <- ggplot(synthetic_placebo_df_Y, aes(x = year, y = Outcome, color = Unit, linetype = Unit)) +
+    geom_line(data = subset(synthetic_placebo_df_Y, Unit != "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 0.8, alpha = 0.6) +
+    geom_line(data = subset(synthetic_placebo_df_Y, Unit == "Original_SC"), 
+              aes(color = Unit, linetype = Unit), size = 1.2) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "blue", size = 0.5) +
+    scale_color_manual(values = color_map_Y, 
+                       breaks = legend_breaks,
+                       labels = legend_labels) +
+    scale_linetype_manual(values = line_type_map_Y, 
+                          breaks = legend_breaks,
+                          labels = legend_labels) +
+    scale_y_continuous(limits = tar_lim) +
+    labs(title = NULL, 
+         x = Xlab, 
+         y = Ylab, 
+         color = "Legend", 
+         linetype = "Legend") +
+    theme_minimal() +
+    theme(text = element_text(family = "sans"), 
+          legend.position = c(0.95, 0.1), 
+          legend.justification = c(1, 1), 
+          legend.text = element_text(size = 14), 
+          legend.key.size = unit(1, "lines"),
+          legend.key.width = unit(2, "lines"), 
+          legend.margin = margin(0, 0, 0, 0),
+          legend.background = element_rect(fill = ggplot2::alpha('grey', 0.5)),
+          axis.title.x = element_text(size = 18),
+          axis.title.y = element_text(size = 18),
+          axis.text.x = element_text(size = 14),
+          axis.text.y = element_text(size = 14),
+          axis.ticks.length = unit(0.25, "cm")) +
+    guides(color = guide_legend(title = NULL),
+           linetype = guide_legend(title = NULL))
+  
+  # ============================================================================
+  # Display plots
+  # ============================================================================
+  
+  print(plot_F)
+  print(plot_Y)
+  
+  # ============================================================================
+  # Return results
+  # ============================================================================
+  
+  return(list(
+    placebo_effects_F = synthetic_placebo_df_F,
+    placebo_effects_Y = synthetic_placebo_df_Y,
+    plot_F = plot_F,
+    plot_Y = plot_Y,
+    nonzero_donors = nonzero_donor_units,
+    num_lodo_tests = length(nonzero_donor_units)
+  ))
+}
 
 # --------------------------------------------------------------------#
 # ------------------   Assumption Plot -------------------------------#
@@ -645,8 +1517,8 @@ linear_equi_conf_plot <- function(F, Y){
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
     geom_line(data = data.frame(time = c(1, 0), value = c(Y_0, F_0), group = 'Y_0'), 
               aes(x = time, y = value), linetype = "solid", color = "black", size = 0.8) +
-    scale_x_continuous(limits = c(0, 1.05)) +
-    scale_y_continuous(limits = c(1, 1.4)) +
+#    scale_x_continuous(limits = c(0, 1.05)) +
+#    scale_y_continuous(limits = c(1, 1.4)) +
     scale_linetype_manual(
       values = c('Y_0' = "solid", 'F_0' = "solid", 'Y_1' = "solid", 'F_1' = "solid", 'Y_0_t' = "solid"),
       labels = c('Y_0' = expression(Y[0]), 'F_0' = expression(E * "[" * F[0] * "]"), 'Y_1' = expression(Y[1]), 'F_1' = expression(F[1]), 'Y_0_t' = expression(Y[1]^(0)))
@@ -662,7 +1534,7 @@ linear_equi_conf_plot <- function(F, Y){
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
   
-  ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
+ # ggsave(filename = paste0(dir$output, "/linear_eq.pdf"), width = 8, height = 6, dpi = 300)
 }
 
 logarithmic_equi_conf_plot <- function(F, Y) {
@@ -718,6 +1590,7 @@ logarithmic_equi_conf_plot <- function(F, Y) {
           axis.text.y = element_text(size = 14),
           axis.ticks.length = unit(0.25, "cm")) +
     theme(legend.title = element_blank())
+  
 }
 
 
@@ -773,7 +1646,7 @@ bias_plot <- function(results_list){
     guides(fill = guide_legend(title = NULL), 
            color = guide_legend(title = NULL))
   
-  ggsave(filename = paste0(dir$output, "/bias_sc_eq.pdf"), width = 8, height = 6, dpi = 300)
+  #ggsave(filename = paste0(dir$output, "/bias_sc_eq_DGP_linear.pdf"), width = 8, height = 6, dpi = 300)
   
 }
 
